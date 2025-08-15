@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Utilisateur{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Mes Tâches</h2>
+            <a href="{% url 'taskdoor:create_task' %}" class="btn btn-primary mb-3">Créer une tâche</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tâches à faire</h5>
+                    <div class="list-group">
+                        {% for task in tasks %}
+                            {% if task.status == 'TO DO' %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ task.titre }}</h6>
+                                        <small>{{ task.date_creation|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ task.description }}</p>
+                                    <form method="post" action="{% url 'taskdoor:update_task_status' task.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="EN COURS">
+                                        <button type="submit" class="btn btn-sm btn-primary">En cours</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tâches en cours</h5>
+                    <div class="list-group">
+                        {% for task in tasks %}
+                            {% if task.status == 'EN COURS' %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ task.titre }}</h6>
+                                        <small>{{ task.date_creation|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ task.description }}</p>
+                                    <form method="post" action="{% url 'taskdoor:update_task_status' task.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="TERMINÉ">
+                                        <button type="submit" class="btn btn-sm btn-success">Terminé</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

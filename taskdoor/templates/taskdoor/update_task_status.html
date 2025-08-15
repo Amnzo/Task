@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier le statut de la tâche{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Modifier le statut de la tâche</h3>
+                </div>
+                <div class="card-body">
+                    {% if status_choices %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Statut</label>
+                                <select name="status" id="status" class="form-select">
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="titre" class="form-label">Titre</label>
+                                <input type="text" id="titre" value="{{ task.titre }}" class="form-control" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea id="description" class="form-control" rows="3" readonly>{{ task.description }}</textarea>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                {% if request.user.niveau == 'admin' %}
+                                    <a href="{% url 'taskdoor:admin_dashboard' %}" class="btn btn-secondary">Annuler</a>
+                                {% else %}
+                                    <a href="{% url 'taskdoor:user_dashboard' %}" class="btn btn-secondary">Annuler</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary">Modifier</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Cette tâche est déjà terminée et ne peut plus être modifiée.
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            {% if request.user.niveau == 'admin' %}
+                                <a href="{% url 'taskdoor:admin_dashboard' %}" class="btn btn-secondary">Retour</a>
+                            {% else %}
+                                <a href="{% url 'taskdoor:user_dashboard' %}" class="btn btn-secondary">Retour</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

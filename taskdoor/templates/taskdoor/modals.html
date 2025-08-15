@@ -1,0 +1,108 @@
+<!-- Modal pour créer une tâche -->
+<div class="modal fade" id="createTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Créer une nouvelle tâche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm" method="post" action="{% url 'taskdoor:create_task' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="titre" class="form-label">Titre</label>
+                        <input type="text" class="form-control" id="titre" name="titre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Statut</label>
+                        <select class="form-select" id="status" name="status" required>
+                            {% for value, label in STATUS_CHOICES %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="importance" class="form-label">Importance</label>
+                        <select class="form-select" id="importance" name="importance" required>
+                            {% for value, label in IMPORTANCE_CHOICES %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assigne_a" class="form-label">Assigné à</label>
+                        <select class="form-select" id="assigne_a" name="assigne_a" required>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour modifier une tâche -->
+<div class="modal fade" id="editTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier la tâche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="edit_titre" class="form-label">Titre</label>
+                        <input type="text" class="form-control" id="edit_titre" name="titre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_importance" class="form-label">Importance</label>
+                        <select class="form-select" id="edit_importance" name="importance" required>
+                            {% for value, label in IMPORTANCE_CHOICES %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour supprimer une tâche -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Supprimer la tâche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette tâche ?</p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger confirm-delete">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
