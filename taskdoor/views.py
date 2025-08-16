@@ -290,7 +290,15 @@ def archive_all_done_tasks(request):
         tasks = Task.objects.filter(status='done', archived=False)
         count = tasks.count()
         tasks.update(archived=True)
+        
+        # Vérifier si c'est une requête AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f'{count} tâches terminées ont été archivées.',
+                'archived_count': count
+            })
+            
         messages.success(request, f'{count} tâches terminées ont été archivées.')
         return redirect('taskdoor:archived_tasks')
-    else:
-        return redirect('taskdoor:admin_dashboard')
+    return redirect('taskdoor:admin_dashboard')
