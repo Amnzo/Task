@@ -9,6 +9,57 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="{% static 'css/kanban-custom.css' %}">
 
+<!-- CSS pour corriger le dropdown -->
+<style>
+.dropdown-menu {
+    z-index: 1050;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    padding: 0.5rem 0;
+    margin: 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block !important;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    color: #1e2125;
+    background-color: #e9ecef;
+}
+
+.dropdown {
+    position: relative;
+}
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -23,16 +74,17 @@
                     </button>
                     <a href="{% url 'taskdoor:create_user' %}" class="btn btn-success">Nouvel utilisateur</a>
                     <a href="{% url 'taskdoor:archived_tasks' %}" class="btn btn-warning">Tâches Archivées</a>
-                   
                 </div>
+                
+                <!-- Dropdown corrigé -->
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
-                        Tous les utilisateurs
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if selected_user %}{{ selected_user.nom }}{% else %}Tous les utilisateurs{% endif %}
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
-                        <li><a class="dropdown-item active" href="?">Tous</a></li>
+                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="?">Tous les utilisateurs</a></li>
                         {% for user in users %}
-                            <li><a class="dropdown-item" href="?user={{ user.id }}">{{ user.email }}</a></li>
+                            <li><a class="dropdown-item" href="?user={{ user.id }}">{{ user.nom }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -58,11 +110,10 @@
                         </button>
                         {% endif %}
                     </div>
-                    <div class="kanban-column-content">
+                    <div class="kanban-column-content kanban-column" data-status="{{ status }}">
                         {% for task in tasks %}
                             {% if task.status == status %}
                                 <div class="kanban-card" data-task-id="{{ task.id }}">
-                                    
                                     <div class="kanban-card-body">
                                         <p class="kanban-card-description">{{ task.description }}</p>
                                         <div class="task-meta">
@@ -93,7 +144,6 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
-                                        
                                         </div>
                                     </div>
                                 </div>
@@ -108,126 +158,6 @@
         {% endfor %}
     </div>
 </div>
-
-{% endblock content %}
-
-{% block extra_js %}
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- jQuery UI -->
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Définition des variables Django -->
-<script>
-    window.taskdoorConfig = {
-        csrfToken: '{{ csrf_token }}',
-        statusCounts: {
-            'TO DO': {{ status_counts.TO_DO }},
-            'EN COURS': {{ status_counts.EN_COURS }},
-            'TERMINÉ': {{ status_counts.TERMINÉ }}
-        }
-    };
-
-    $(document).ready(function() {
-        // Vérification de l'initialisation de jQuery et SweetAlert2
-        console.log('jQuery version:', $.fn.jquery);
-        console.log('SweetAlert2 est disponible:', typeof Swal !== 'undefined');
-        console.log('Boutons archive-all-done trouvés:', $('.archive-all-done').length);
-
-        // Fonction pour mettre à jour les compteurs de statut
-        function updateStatusCounts() {
-            $('.kanban-column').each(function() {
-                const status = $(this).data('status');
-                const count = $(this).find('.kanban-card').length;
-                $(this).find('.status-count').text(count);
-            });
-        }
-
-    // Initial call to update status counts
-    updateStatusCounts();
-
-    // Gestion de l'archivage de toutes les tâches terminées
-    $(document).on('click', '.archive-all-done', function(e) {
-        console.log('Bouton archive-all-done cliqué!');
-        e.preventDefault();
-        const button = $(this);
-        console.log('Bouton trouvé:', button.length > 0);
-        
-        const column = button.closest('.card');
-        console.log('Colonne parente trouvée:', column.length > 0);
-        
-        const taskCount = column.find('.kanban-card').length;
-        console.log('Nombre de tâches trouvées:', taskCount);
-        
-        if (taskCount === 0) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Aucune tâche à archiver',
-                text: 'Il n\'y a aucune tâche terminée à archiver pour le moment.',
-                confirmButtonText: 'OK'
-            });
-            return;
-        }
-        
-        Swal.fire({
-            title: 'Archiver les tâches terminées',
-            text: `Êtes-vous sûr de vouloir archiver les ${taskCount} tâches terminées ?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Oui, archiver',
-            cancelButtonText: 'Annuler',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading()
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '{% url "taskdoor:archive_all_done_tasks" %}',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    data: {},
-                    dataType: 'json'
-                })
-                .done(function(response) {
-                    console.log('Réponse du serveur:', response);
-                    if (response.success) {
-                        Swal.fire({
-                            title: 'Succès !',
-                            text: response.message || `Les ${response.archived_count || taskCount} tâches ont été archivées avec succès.`,
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        throw new Error(response.error || 'Erreur inconnue');
-                    }
-                })
-                .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.error('Erreur AJAX:', textStatus, errorThrown);
-                    let errorMsg = 'Une erreur est survenue lors de l\'archivage des tâches.';
-                    try {
-                        const response = JSON.parse(jqXHR.responseText);
-                        errorMsg = response.error || errorMsg;
-                    } catch (e) {}
-                    
-                    return Swal.fire({
-                        title: 'Erreur',
-                        text: errorMsg,
-                        icon: 'error'
-                    });
-                });
-        }
-    });
-});
-</script>
 
 <!-- Modals -->
 <!-- Modal d'édition de tâche -->
@@ -287,7 +217,7 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <input type="hidden" id="taskId">
+                    <input type="hidden" id="taskIdReassign">
                     <div class="mb-3">
                         <label class="form-label">Assigné actuel</label>
                         <p id="currentAssignee" class="form-control-plaintext"></p>
@@ -320,6 +250,7 @@
             </div>
             <div class="modal-body">
                 <p>Êtes-vous sûr de vouloir supprimer cette tâche ?</p>
+                <input type="hidden" id="taskIdDelete">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -329,398 +260,457 @@
     </div>
 </div>
 
+{% endblock content %}
 
+{% block extra_js %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Définition des variables Django -->
+<script>
+    window.taskdoorConfig = {
+        csrfToken: '{{ csrf_token }}',
+        statusCounts: {
+            'TO_DO': {{ status_counts.TO_DO|default:0 }},
+            'EN_COURS': {{ status_counts.EN_COURS|default:0 }},
+            'TERMINÉ': {{ status_counts.TERMINÉ|default:0 }}
+        }
+    };
+</script>
 
 <!-- Code JavaScript principal -->
 <script>
 $(document).ready(function() {
-    // Vérification de l'initialisation de jQuery et SweetAlert2
+    console.log('Initialisation de la page...');
     console.log('jQuery version:', $.fn.jquery);
-    console.log('SweetAlert2 est disponible:', typeof Swal !== 'undefined');
-    console.log('Boutons archive-all-done trouvés:', $('.archive-all-done').length);
+    console.log('Bootstrap disponible:', typeof bootstrap !== 'undefined');
+    console.log('SweetAlert2 disponible:', typeof Swal !== 'undefined');
+
+    // Attendre que Bootstrap soit complètement chargé
+    setTimeout(function() {
+        initializeDropdown();
+    }, 500);
+
+    // Fonction d'initialisation du dropdown
+    function initializeDropdown() {
+        console.log('Initialisation du dropdown...');
+        
+        const dropdownElement = document.getElementById('userDropdown');
+        const dropdownMenu = dropdownElement ? dropdownElement.nextElementSibling : null;
+        
+        if (dropdownElement && dropdownMenu) {
+            console.log('Élément dropdown et menu trouvés');
+            
+            // Vérifier si Bootstrap est disponible
+            if (typeof bootstrap !== 'undefined') {
+                try {
+                    // Forcer l'initialisation du dropdown
+                    const dropdown = new bootstrap.Dropdown(dropdownElement);
+                    console.log('Dropdown Bootstrap initialisé');
+                    
+                    // Test d'ouverture programmatique
+                    dropdownElement.addEventListener('click', function(e) {
+                        console.log('Clic détecté, tentative d\'ouverture...');
+                        e.preventDefault();
+                        
+                        // Toggle manual du dropdown
+                        if (dropdownMenu.classList.contains('show')) {
+                            dropdown.hide();
+                        } else {
+                            dropdown.show();
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('Erreur Bootstrap, utilisation de la méthode manuelle:', error);
+                    useManualDropdown();
+                }
+            } else {
+                console.log('Bootstrap non disponible, utilisation de la méthode manuelle');
+                useManualDropdown();
+            }
+        } else {
+            console.error('Éléments dropdown non trouvés');
+        }
+    }
+
+    // Fonction de dropdown manuel en cas d'échec de Bootstrap
+    function useManualDropdown() {
+        const dropdownElement = document.getElementById('userDropdown');
+        const dropdownMenu = dropdownElement ? dropdownElement.nextElementSibling : null;
+        
+        if (dropdownElement && dropdownMenu) {
+            console.log('Utilisation du dropdown manuel');
+            
+            dropdownElement.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Toggle manuel du dropdown');
+                
+                // Toggle de la classe show
+                dropdownMenu.classList.toggle('show');
+                
+                // Mettre à jour l'attribut aria-expanded
+                const isExpanded = dropdownMenu.classList.contains('show');
+                dropdownElement.setAttribute('aria-expanded', isExpanded);
+                
+                console.log('Dropdown', isExpanded ? 'ouvert' : 'fermé');
+            });
+            
+            // Fermer le dropdown si on clique ailleurs
+            document.addEventListener('click', function(e) {
+                if (!dropdownElement.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                    dropdownElement.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+    }
 
     // Fonction pour mettre à jour les compteurs de statut
     function updateStatusCounts() {
         $('.kanban-column').each(function() {
             const status = $(this).data('status');
             const count = $(this).find('.kanban-card').length;
-            $(this).find('.status-count').text(count);
+            $(this).closest('.card').find('.badge').text(count);
         });
     }
 
-    // Initial call to update status counts
+    // Appel initial pour mettre à jour les compteurs
     updateStatusCounts();
-        // Gestion du drag and drop
-        $('.kanban-column').sortable({
-            connectWith: '.kanban-column',
-            placeholder: 'kanban-card-placeholder',
-            forcePlaceholderSize: true,
-            revert: 200,
-            tolerance: 'pointer',
-            start: function(event, ui) {
-                ui.placeholder.height(ui.item.height());
-            },
-            stop: function(event, ui) {
-                const taskId = ui.item.data('task-id');
-                const newStatus = $(this).data('status');
-                
+
+    // Gestion de l'archivage de toutes les tâches terminées
+    $(document).on('click', '.archive-all-done', function(e) {
+        console.log('Bouton archive-all-done cliqué!');
+        e.preventDefault();
+        const button = $(this);
+        const column = button.closest('.card');
+        const taskCount = column.find('.kanban-card').length;
+        
+        console.log('Nombre de tâches trouvées:', taskCount);
+        
+        if (taskCount === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Aucune tâche à archiver',
+                text: 'Il n\'y a aucune tâche terminée à archiver pour le moment.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Archiver les tâches terminées',
+            text: `Êtes-vous sûr de vouloir archiver les ${taskCount} tâches terminées ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui, archiver',
+            cancelButtonText: 'Annuler',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "taskdoor:archive_all_done_tasks" %}',
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': window.taskdoorConfig.csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    data: {},
+                    dataType: 'json'
+                })
+                .done(function(response) {
+                    console.log('Réponse du serveur:', response);
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Succès !',
+                            text: response.message || `Les ${response.archived_count || taskCount} tâches ont été archivées avec succès.`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(response.error || 'Erreur inconnue');
+                    }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error('Erreur AJAX:', textStatus, errorThrown);
+                    let errorMsg = 'Une erreur est survenue lors de l\'archivage des tâches.';
+                    try {
+                        const response = JSON.parse(jqXHR.responseText);
+                        errorMsg = response.error || errorMsg;
+                    } catch (e) {}
+                    
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: errorMsg,
+                        icon: 'error'
+                    });
+                });
+            }
+        });
+    });
+
+    // Gestion du drag and drop avec jQuery UI
+    $('.kanban-column').sortable({
+        connectWith: '.kanban-column',
+        placeholder: 'kanban-card-placeholder',
+        forcePlaceholderSize: true,
+        revert: 200,
+        tolerance: 'pointer',
+        start: function(event, ui) {
+            ui.placeholder.height(ui.item.height());
+            ui.item.data('old-status', ui.item.closest('.kanban-column').data('status'));
+        },
+        stop: function(event, ui) {
+            const taskId = ui.item.data('task-id');
+            const newStatus = ui.item.closest('.kanban-column').data('status');
+            const oldStatus = ui.item.data('old-status');
+            
+            if (newStatus !== oldStatus) {
                 $.ajax({
                     url: '/taskdoor/update_task_status/' + taskId + '/',
                     type: 'POST',
                     data: {
                         status: newStatus,
-                        csrfmiddlewaretoken: '{{ csrf_token }}'
-                    },
-                    success: function(response) {
-                        if (!response.success) {
-                            // Si l'update échoue, remettre la tâche à sa position initiale
-                            ui.item.appendTo(ui.item.parent());
-                        }
-                    }
-                });
-            }
-        }).disableSelection();
-
-        // Gestion du changement de statut via bouton
-        $('.change-status').on('click', function(e) {
-            e.preventDefault();
-            const taskId = $(this).data('task-id');
-            const newStatus = $(this).data('new-status');
-            
-            $.ajax({
-                url: '/taskdoor/update_task_status/' + taskId + '/',
-                type: 'POST',
-                data: {
-                    status: newStatus,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Mettre à jour la tâche dans la colonne correspondante
-                        const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]');
-                        const currentColumn = taskCard.closest('.kanban-column');
-                        const targetColumn = $('.kanban-column[data-status="' + newStatus + '"]');
-                        
-                        currentColumn.find('.kanban-cards').append(taskCard);
-                        
-                        // Mettre à jour le badge de statut
-                        const statusLabel = taskCard.find('.task-status');
-                        statusLabel.text(newStatus);
-                        statusLabel.removeClass('bg-success bg-warning bg-danger').addClass('bg-' + newStatus.toLowerCase());
-                    }
-                }
-            });
-        });
-
-        // Configuration du drag and drop
-        $('.kanban-column').sortable({
-            connectWith: '.kanban-column',
-            placeholder: 'kanban-card-placeholder',
-            helper: 'clone',
-            revert: 200,
-            delay: 150,
-            forcePlaceholderSize: true,
-            tolerance: 'pointer',
-            cursor: 'move',
-            cursorAt: { top: 15, left: 15 },
-            update: function(event, ui) {
-                const taskId = ui.item.data('task-id');
-                const newStatus = ui.item.closest('.kanban-column').data('status');
-                const oldStatus = ui.item.data('old-status');
-                
-                // Mettre à jour le statut de la tâche
-                $.ajax({
-                    url: '/taskdoor/update_task_status/' + taskId + '/',
-                    type: 'POST',
-                    data: {
-                        'status': newStatus,
-                        'csrfmiddlewaretoken': window.taskdoorConfig.csrfToken
+                        csrfmiddlewaretoken: window.taskdoorConfig.csrfToken
                     },
                     success: function(response) {
                         if (response.success) {
-                            // Mettre à jour le badge du nombre de tâches
-                            window.taskdoorConfig.statusCounts[newStatus]++;
-                            window.taskdoorConfig.statusCounts[oldStatus]--;
-                            
-                            // Mettre à jour les badges
-                            $('.kanban-column').each(function() {
-                                const status = $(this).data('status');
-                                $(this).find('.status-count').text(window.taskdoorConfig.statusCounts[status]);
-                            });
-                            
-                            // Mettre à jour le statut dans la carte
-                            ui.item.data('old-status', newStatus);
+                            updateStatusCounts();
+                        } else {
+                            // Remettre la tâche à sa position initiale en cas d'erreur
+                            $('.kanban-column[data-status="' + oldStatus + '"]').append(ui.item);
+                            updateStatusCounts();
                         }
+                    },
+                    error: function() {
+                        // Remettre la tâche à sa position initiale en cas d'erreur
+                        $('.kanban-column[data-status="' + oldStatus + '"]').append(ui.item);
+                        updateStatusCounts();
                     }
                 });
-            },
-            start: function(event, ui) {
-                ui.item.data('old-status', ui.item.closest('.kanban-column').data('status'));
-                ui.placeholder.height(ui.item.height());
             }
-        });
-
-        // Vérifications de débogage
-        console.log('jQuery version:', $.fn.jquery);
-        console.log('SweetAlert2 est disponible:', typeof Swal !== 'undefined');
-        console.log('Boutons archive-all-done trouvés:', $('.archive-all-done').length);
-        
-        // Gestion de la création de tâche
-        const createTaskModal = new bootstrap.Modal(document.getElementById('createTaskModal'));
-        $('#createTaskForm').on('submit', function(e) {
-            e.preventDefault();
-            const form = $(this);
-            
-            $.ajax({
-                url: form.attr('action'),
-                type: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Ajouter la nouvelle tâche au tableau
-                        const status = response.status;
-                        const column = $('.kanban-column[data-status="' + status + '"]');
-                        const taskHtml = `
-                            <div class="kanban-card" data-task-id="${response.id}">
-                                <div class="kanban-card-header">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="importance-badge ${response.importance}">
-                                            <div class="importance-label">${response.importance}</div>
-                                        </div>
-                                        <div class="task-actions d-flex gap-2">
-                                            <button class="btn btn-sm btn-primary edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-task-id="${response.id}">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="${response.id}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="kanban-card-body">
-                                    <p class="kanban-card-description">${response.description}</p>
-                                    <div class="task-meta d-flex flex-wrap gap-2">
-                                        <span class="badge bg-secondary">Assigné à: ${response.assigned_to_email}</span>
-                                        <span class="badge bg-${response.importance === 'LOW' ? 'success' : response.importance === 'MEDIUM' ? 'warning' : 'danger'}">
-                                            ${response.importance}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        column.append(taskHtml);
-                        
-                        // Mettre à jour le badge du nombre de tâches
-                        window.taskdoorConfig.statusCounts[status]++;
-                        column.closest('.card').find('.badge').text(window.taskdoorConfig.statusCounts[status]);
-                        
-                        // Fermer la modal
-                        createTaskModal.hide();
-                    }
-                }
-            });
-        });
-
-        // Gestion de la modification
-        const editTaskModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
-        
-        $('.edit-task').on('click', function(e) {
-            e.preventDefault();
-            const taskId = $(this).data('task-id');
-            const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]').first();
-            
-            // Récupérer les données de la tâche
-            const description = taskCard.find('.kanban-card-description').text();
-            const importance = taskCard.find('.importance-badge').attr('class').match(/LOW|MEDIUM|HIGH/)[0];
-            
-            // Remplir le formulaire
-            $('#editTaskForm textarea[name="description"]').val(description);
-            $('#editTaskForm select[name="importance"]').val(importance);
-            $('#editTaskForm').data('task-id', taskId);
-            
-            // Afficher la modal
-            editTaskModal.show();
-        });
-
-        // Soumettre le formulaire de modification
-        $('#editTaskForm').on('submit', function(e) {
-            e.preventDefault();
-            const form = $(this);
-            const taskId = form.data('task-id');
-            
-            $.ajax({
-                url: '/taskdoor/update_task_info/' + taskId + '/',
-                type: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Mettre à jour la carte
-                        const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]').first();
-                        taskCard.find('.kanban-card-description').text(response.description);
-                        taskCard.find('.importance-badge')
-                            .removeClass('LOW MEDIUM HIGH')
-                            .addClass(response.importance)
-                            .find('.importance-label').text(response.importance);
-                        
-                        // Fermer la modal
-                        editTaskModal.hide();
-                    }
-                }
-            });
-        });
-
-        // Gestion de la suppression
-        $('.delete-task').on('click', function(e) {
-            e.preventDefault();
-            const taskId = $(this).data('task-id');
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
-              $.ajax({
-                url: '/taskdoor/delete_task_admin/' + taskId + '/',
-                type: 'POST',
-                data: {
-                  'csrfmiddlewaretoken': window.taskdoorConfig.csrfToken
-                },
-                success: function(response) {
-                  if (response.success) {
-                    // Supprimer la carte
-                    $('.kanban-card[data-task-id="' + taskId + '"]').remove();
-                    
-                    // Mettre à jour le badge du nombre de tâches
-                    const status = $('.kanban-card[data-task-id="' + taskId + '"]').closest('.kanban-column').data('status');
-                    window.taskdoorConfig.statusCounts[status]--;
-                    
-                    // Mettre à jour le badge
-                    $('.kanban-column[data-status="' + status + '"]').closest('.card').find('.badge').text(window.taskdoorConfig.statusCounts[status]);
-                  }
-                }
-              });
-            }
-        });
-
-        // Gestion de la réassignation
-        $('.reassign-task').on('click', function(e) {
-            e.preventDefault();
-            const taskId = $(this).data('task-id');
-            const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]').first();
-            
-            // Charger les informations de la tâche
-            $.ajax({
-                url: '/taskdoor/get_task/' + taskId + '/',
-                type: 'GET',
-                success: function(response) {
-                    if (response.success) {
-                        $('#reassignTaskModal #taskId').val(taskId);
-                        $('#reassignTaskModal #currentAssignee').text(response.assigne_a.email);
-                        
-                        // Sélectionner l'utilisateur actuel
-                        $('#reassignTaskModal select[name="user"]').val(response.assigne_a.id);
-                        
-                        // Afficher la modal
-                        $('#reassignTaskModal').modal('show');
-                    }
-                }
-            });
-        });
-
-        // Soumission du formulaire de réassignation
-        $('#reassignTaskModal form').on('submit', function(e) {
-            e.preventDefault();
-            const form = $(this);
-            const taskId = form.find('#taskId').val();
-            
-            $.ajax({
-                url: '/taskdoor/reassign_task/' + taskId + '/',
-                type: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Mettre à jour l'affichage de l'assigné
-                        const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]');
-                        taskCard.find('.badge.bg-secondary').text('Assigné à: ' + response.assigne_a.email);
-                        
-                        // Mettre à jour le badge de comptage
-                        updateStatusCounts();
-                        
-                        // Fermer la modal
-                        const reassignModal = bootstrap.Modal.getInstance(document.getElementById('reassignTaskModal'));
-                        if (reassignModal) {
-                            reassignModal.hide();
-                        }
-                    }
-                }
-            });
-        });
-
-        // Soumission du formulaire d'édition
-        $('#editTaskModal form').on('submit', function(e) {
-            e.preventDefault();
-            const form = $(this);
-            const taskId = form.find('#taskId').val();
-            
-            $.ajax({
-                url: '/taskdoor/update_task_info/' + taskId + '/',
-                type: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Mettre à jour la carte
-                        const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]');
-                        taskCard.find('.card-title').text(response.titre);
-                        taskCard.find('.card-text').text(response.description);
-                        taskCard.find('.task-importance').removeClass('low medium high').addClass(response.importance);
-                        
-                        // Mettre à jour le statut si nécessaire
-                        if (taskCard.closest('.kanban-column').data('status') !== response.status) {
-                            // Supprimer la carte de l'ancienne colonne
-                            taskCard.remove();
-                            // Ajouter dans la nouvelle colonne
-                            $('.kanban-column[data-status="' + response.status + '"]').append(taskCard);
-                        }
-                        
-                        // Mettre à jour le badge de comptage
-                        updateStatusCounts();
-                        
-                        // Fermer la modal
-                        const editModal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
-                        if (editModal) {
-                            editModal.hide();
-                        }
-                    }
-                }
-            });
-        });
-
-        // Fonction pour mettre à jour les compteurs de statut
-        function updateStatusCounts() {
-            $('.kanban-column').each(function() {
-                const status = $(this).data('status');
-                const count = $(this).find('.kanban-card').length;
-                $(this).find('.status-count').text(count);
-            });
         }
+    }).disableSelection();
 
-        // Initialisation simple du menu déroulant avec jQuery
-        $(document).ready(function() {
-            $('.dropdown-toggle').dropdown();
-            
-            // Mettre à jour le texte du bouton lors de la sélection
-            $('.dropdown-item').on('click', function(e) {
-                const $this = $(this);
-                const text = $this.text().trim();
-                const $dropdown = $this.closest('.dropdown');
-                
-                // Mettre à jour le texte du bouton
-                if ($this.attr('href') === '?') {
-                    $dropdown.find('.dropdown-toggle').text('Tous les utilisateurs');
-                } else {
-                    $dropdown.find('.dropdown-toggle').text(text);
+    // Gestion de la réassignation
+    $(document).on('click', '.reassign-task', function(e) {
+        e.preventDefault();
+        const taskId = $(this).data('task-id');
+        
+        // Stocker l'ID de la tâche dans la modal
+        $('#taskIdReassign').val(taskId);
+        
+        // Charger les informations de la tâche
+        $.ajax({
+            url: '/taskdoor/get_task/' + taskId + '/',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    $('#currentAssignee').text(response.assigne_a.nom || response.assigne_a.email);
+                    $('#reassignTaskModal select[name="user"]').val(response.assigne_a.id);
                 }
-                
-                // Mettre à jour la classe active
-                $this.closest('.dropdown-menu').find('.dropdown-item').removeClass('active');
-                $this.addClass('active');
-            });
+            }
         });
     });
+
+    // Soumission du formulaire de réassignation
+    $('#reassignTaskModal form').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const taskId = $('#taskIdReassign').val();
+        
+        $.ajax({
+            url: '/taskdoor/reassign_task/' + taskId + '/',
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Mettre à jour l'affichage de l'assigné
+                    const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]');
+                    taskCard.find('.user-email').first().text(response.assigne_a.nom || response.assigne_a.email);
+                    
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('reassignTaskModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Afficher un message de succès
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tâche réassignée',
+                        text: 'La tâche a été réassignée avec succès.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        });
+    });
+
+    // Gestion de la suppression
+    $(document).on('click', '.delete-task', function(e) {
+        e.preventDefault();
+        const taskId = $(this).data('task-id');
+        $('#taskIdDelete').val(taskId);
+    });
+
+    // Confirmation de suppression
+    $(document).on('click', '.delete-task-confirm', function(e) {
+        e.preventDefault();
+        const taskId = $('#taskIdDelete').val();
+        
+        $.ajax({
+            url: '/taskdoor/delete_task_admin/' + taskId + '/',
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': window.taskdoorConfig.csrfToken
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Supprimer la carte de l'affichage
+                    $('.kanban-card[data-task-id="' + taskId + '"]').fadeOut(300, function() {
+                        $(this).remove();
+                        updateStatusCounts();
+                    });
+                    
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteTaskModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Afficher un message de succès
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tâche supprimée',
+                        text: 'La tâche a été supprimée avec succès.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        });
+    });
+
+    // Gestion de l'édition de tâche
+    $(document).on('click', '.edit-task', function(e) {
+        e.preventDefault();
+        const taskId = $(this).data('task-id');
+        const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]');
+        
+        // Récupérer les données de la tâche depuis la carte
+        const description = taskCard.find('.kanban-card-description').text().trim();
+        
+        // Remplir le formulaire
+        $('#taskId').val(taskId);
+        $('#taskDescription').val(description);
+    });
+
+    // Soumission du formulaire d'édition
+    $('#editTaskForm').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const taskId = $('#taskId').val();
+        
+        $.ajax({
+            url: '/taskdoor/update_task_info/' + taskId + '/',
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Mettre à jour la carte
+                    const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]');
+                    taskCard.find('.kanban-card-description').text(response.description);
+                    
+                    // Si le statut a changé, déplacer la carte
+                    const currentColumn = taskCard.closest('.kanban-column');
+                    const currentStatus = currentColumn.data('status');
+                    
+                    if (currentStatus !== response.status) {
+                        const targetColumn = $('.kanban-column[data-status="' + response.status + '"]');
+                        taskCard.appendTo(targetColumn);
+                        updateStatusCounts();
+                    }
+                    
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Afficher un message de succès
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Tâche modifiée',
+                        text: 'La tâche a été modifiée avec succès.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        });
+    });
+
+    // Test du dropdown avec un délai (supprimé car intégré dans initializeDropdown)
+    setTimeout(function() {
+        console.log('Vérification finale du dropdown...');
+        const dropdownBtn = document.getElementById('userDropdown');
+        const dropdownMenu = document.querySelector('#userDropdown + .dropdown-menu');
+        
+        console.log('Bouton dropdown:', dropdownBtn ? 'trouvé' : 'non trouvé');
+        console.log('Menu dropdown:', dropdownMenu ? 'trouvé' : 'non trouvé');
+        
+        if (dropdownMenu) {
+            console.log('Classes du menu:', dropdownMenu.className);
+            console.log('Style display du menu:', window.getComputedStyle(dropdownMenu).display);
+        }
+    }, 1500);
+});
 </script>
+
+<!-- CSS personnalisé pour le placeholder du drag and drop -->
+<style>
+.kanban-card-placeholder {
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    margin: 0.5rem 0;
+    height: 100px;
+    border-radius: 0.25rem;
+}
+
+.kanban-card {
+    cursor: move;
+    margin-bottom: 0.5rem;
+}
+
+.kanban-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Style pour le dropdown */
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+
 {% endblock %}

@@ -71,9 +71,11 @@ def admin_dashboard(request):
     filter_kwargs = {'archived': False}
     
     # Filtrer par utilisateur si spécifié
+    selected_user = None
     user_id = request.GET.get('user')
     if user_id:
-        filter_kwargs['assigne_a__id'] = user_id
+        selected_user = get_object_or_404(Door, id=user_id)
+        filter_kwargs['assigne_a'] = selected_user
     
     # Récupérer toutes les tâches correspondant aux filtres
     all_tasks = Task.objects.filter(**filter_kwargs)
@@ -93,6 +95,7 @@ def admin_dashboard(request):
         'STATUS_CHOICES': STATUS_CHOICES,
         'IMPORTANCE_CHOICES': IMPORTANCE_CHOICES,
         'status_counts': status_counts,
+        'selected_user': selected_user,
     }
     return render(request, 'taskdoor/kanban_admin.html', context)
 
