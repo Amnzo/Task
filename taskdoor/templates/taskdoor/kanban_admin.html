@@ -65,7 +65,7 @@
                                     
                                     <div class="kanban-card-body">
                                         <p class="kanban-card-description">{{ task.description }}</p>
-                                        <div class="task-meta d-flex flex-wrap align-items-center gap-3 mt-2">
+                                        <div class="task-meta">
                                             <div class="user-badge assignee">
                                                 <i class="fas fa-user-tag me-1"></i>
                                                 <span class="user-email">{{ task.assigne_a.email }}</span>
@@ -80,16 +80,18 @@
                                             {% elif task.importance == 'HIGH' %}bg-danger
                                             {% endif %}">
                                             {{ task.get_importance_display }}
-                                        </span>
-                                        <a href="{% url 'taskdoor:edit_task' task.id %}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-info reassign-task" data-bs-toggle="modal" data-bs-target="#reassignTaskModal" data-task-id="{{ task.id }}">
-                                            <i class="fas fa-user-plus"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="{{ task.id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                            </span>
+                                            <div class="action-buttons d-flex">
+                                                <a href="{% url 'taskdoor:edit_task' task.id %}" class="btn btn-sm btn-primary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-info reassign-task" data-bs-toggle="modal" data-bs-target="#reassignTaskModal" data-task-id="{{ task.id }}" title="Réassigner">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="{{ task.id }}" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
                                         
                                         </div>
                                     </div>
