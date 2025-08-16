@@ -8,18 +8,8 @@ from django.http import JsonResponse
 
 # Filtre personnalisé pour accéder aux éléments d'un dictionnaire
 @register.filter
-@user_passes_test(lambda u: u.niveau == 'admin')
 def get_item(dictionary, key):
-    return dictionary.get(key)
-
-# Pour utiliser le filtre dans les templates
-from django.template import Library
-register = Library()
-
-@register.filter
-@user_passes_test(lambda u: u.niveau == 'admin')
-def get_item(dictionary, key):
-    return dictionary.get(key, '')
+    return dictionary.get(key, 0)  # Retourne 0 si la clé n'existe pas
 
 from .models import Task, Door, STATUS_CHOICES, IMPORTANCE_CHOICES
 from .forms import LoginForm, TaskForm, TaskAdminForm, DoorCreationForm
@@ -289,11 +279,10 @@ def archive_task(request, task_id):
 def archive_all_done_tasks(request):
     # View to archive all tasks with status 'done'.
     if request.method == 'POST':
-        tasks = Task.objects.filter(status='done', is_archived=False)
+        tasks = Task.objects.filter(status='done', archived=False)
         count = tasks.count()
-        tasks.update(is_archived=True)
+        tasks.update(archived=True)
         messages.success(request, f'{count} tâches terminées ont été archivées.')
         return redirect('taskdoor:archived_tasks')
     else:
         return redirect('taskdoor:admin_dashboard')
-

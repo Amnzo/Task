@@ -17,9 +17,9 @@ STATUS_CHOICES = (
 
 # Niveaux d'importance
 IMPORTANCE_CHOICES = (
-    ('LOW', 'L'),
-    ('MEDIUM', 'M'),
-    ('HIGH', 'H')
+    ('LOW', 'Faible'),
+    ('MEDIUM', 'Moyen'),
+    ('HIGH', 'Élevé')
 )
 
 class DoorManager(BaseUserManager):

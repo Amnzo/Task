@@ -115,13 +115,13 @@
                             {% if task.status == status %}
                                 <div class="kanban-card" data-task-id="{{ task.id }}">
                                     <div class="kanban-card-body">
-                                        <p class="kanban-card-description">{{ task.description }}</p>
+                                        <p class="kanban-card-description text-uppercase">{{ task.description }}</p>
                                         <div class="task-meta">
                                             <div class="user-badge assignee">
                                                 <i class="fas fa-user-tag me-1"></i>
                                                 <span class="user-email">{{ task.assigne_a.nom }}</span>
                                             </div>
-                                            
+                                           
                                             <span class="badge 
                                             {% if task.importance == 'LOW' %}bg-success
                                             {% elif task.importance == 'MEDIUM' %}bg-warning text-dark
@@ -410,6 +410,11 @@ $(document).ready(function() {
             title: 'Archiver les tâches terminées',
             text: `Êtes-vous sûr de vouloir archiver les ${taskCount} tâches terminées ?`,
             icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui, archiver',
+            cancelButtonText: 'Annuler',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
