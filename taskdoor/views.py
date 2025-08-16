@@ -62,7 +62,10 @@ def admin_dashboard(request):
         return redirect('taskdoor:user_dashboard')
 
     # Récupérer tous les utilisateurs pour le filtre
-    users = Door.objects.all()
+    users = list(Door.objects.all())
+    print(f"DEBUG - Nombre d'utilisateurs trouvés: {len(users)}")
+    for user in users:
+        print(f"DEBUG - Utilisateur: {user.email}, ID: {user.id}")
     
     # Initialiser les filtres pour les tâches non archivées
     filter_kwargs = {'archived': False}

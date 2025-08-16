@@ -68,12 +68,9 @@
                                         <div class="task-meta">
                                             <div class="user-badge assignee">
                                                 <i class="fas fa-user-tag me-1"></i>
-                                                <span class="user-email">{{ task.assigne_a.email }}</span>
+                                                <span class="user-email">{{ task.assigne_a.nom }}</span>
                                             </div>
-                                            <div class="user-badge creator">
-                                                <i class="fas fa-user-edit me-1"></i>
-                                                <span class="user-email">{{ task.cree_par.email }}</span>
-                                            </div>
+                                            
                                             <span class="badge 
                                             {% if task.importance == 'LOW' %}bg-success
                                             {% elif task.importance == 'MEDIUM' %}bg-warning text-dark
@@ -81,6 +78,10 @@
                                             {% endif %}">
                                             {{ task.get_importance_display }}
                                             </span>
+                                            <div class="user-badge creator">
+                                                <i class="fas fa-user-edit me-1"></i>
+                                                <span class="user-email">{{ task.cree_par.nom }}</span>
+                                            </div>
                                             <div class="action-buttons d-flex">
                                                 <a href="{% url 'taskdoor:edit_task' task.id %}" class="btn btn-sm btn-primary" title="Modifier">
                                                     <i class="fas fa-edit"></i>
@@ -697,6 +698,29 @@ $(document).ready(function() {
                 $(this).find('.status-count').text(count);
             });
         }
+
+        // Initialisation simple du menu déroulant avec jQuery
+        $(document).ready(function() {
+            $('.dropdown-toggle').dropdown();
+            
+            // Mettre à jour le texte du bouton lors de la sélection
+            $('.dropdown-item').on('click', function(e) {
+                const $this = $(this);
+                const text = $this.text().trim();
+                const $dropdown = $this.closest('.dropdown');
+                
+                // Mettre à jour le texte du bouton
+                if ($this.attr('href') === '?') {
+                    $dropdown.find('.dropdown-toggle').text('Tous les utilisateurs');
+                } else {
+                    $dropdown.find('.dropdown-toggle').text(text);
+                }
+                
+                // Mettre à jour la classe active
+                $this.closest('.dropdown-menu').find('.dropdown-item').removeClass('active');
+                $this.addClass('active');
+            });
+        });
     });
 </script>
 {% endblock %}
