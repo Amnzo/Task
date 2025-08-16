@@ -3,13 +3,19 @@ from .models import Task, Door
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 class LoginForm(AuthenticationForm):
-    username = forms.EmailField(
-        label='Email',
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    username = forms.CharField(
+        label='Nom d\'utilisateur',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Entrez votre nom d\'utilisateur'
+        })
     )
     password = forms.CharField(
         label='Mot de passe',
-        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Entrez votre mot de passe'
+        })
     )
 
 class DoorCreationForm(UserCreationForm):

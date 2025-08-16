@@ -21,19 +21,27 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
-            email = form.cleaned_data.get('username')
+            username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                login(request, user)
-                if user.niveau == 'admin':
-                    return redirect('taskdoor:admin_dashboard')
-                return redirect('taskdoor:user_dashboard')
+            # On utilise le backend d'authentification personnalisé
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            try:
+                user = User.objects.get(nom=username)
+                if user.check_password(password):
+                    login(request, user)
+                    if user.niveau == 'admin':
+                        return redirect('taskdoor:admin_dashboard')
+                    return redirect('taskdoor:user_dashboard')
+                else:
+                    messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
+            except User.DoesNotExist:
+                messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
         else:
-            messages.error(request, 'Email ou mot de passe invalide')
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
     else:
         form = LoginForm()
-    return render(request, 'taskdoor/login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
