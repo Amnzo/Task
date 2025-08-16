@@ -19,4 +19,8 @@ urlpatterns = [
     path('task/<int:task_id>/delete_admin/', views.delete_task_admin, name='delete_task_admin'),
     path('task/<int:task_id>/reassign/', views.reassign_task, name='reassign_task'),
     path('task/<int:task_id>/edit/', views.edit_task, name='edit_task'),
+    path('tasks/archived/', views.archived_tasks, name='archived_tasks'),
+    path('task/<int:task_id>/unarchive/', views.unarchive_task, name='unarchive_task'),
+    path('task/<int:task_id>/archive/', views.archive_task, name='archive_task'),
+    path('tasks/archive-all-done/', views.archive_all_done_tasks, name='archive_all_done_tasks'),
 ]

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load dict_filters %}
+
+{% block title %}Kanban Personnalisé{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/custom-kanban.css' %}">
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/custom-kanban.css' %}">
+
+<div class="kanban-container">
+    <header class="kanban-header">
+        <h1>Tableau Kanban</h1>
+    </header>
+    
+    <div class="kanban-actions">
+        <div class="action-buttons">
+            <a href="{% url 'taskdoor:create_task' %}" class="button primary">
+                <i class="fas fa-plus"></i> Nouvelle tâche
+            </a>
+            <a href="{% url 'taskdoor:create_user' %}" class="button warning">
+                <i class="fas fa-user-plus"></i> Nouvel utilisateur
+            </a>
+            <a href="{% url 'taskdoor:archived_tasks' %}" class="button">
+                <i class="fas fa-archive"></i> Tâches Archivées
+            </a>
+        </div>
+        
+        <div class="filter-dropdown">
+            <select id="user-filter">
+                <option value="">Tous les utilisateurs</option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.email }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <div class="kanban-content">
+        {% for status in STATUS_CHOICES %}
+        <div class="kanban-column" data-status="{{ status.0 }}">
+            <div class="column-header">
+                <span>{{ status.1 }}</span>
+                <span class="task-count">{{ tasks|filter_by_status:status.0|length }}</span>
+            </div>
+            <div class="column-content" id="{{ status.0|slugify }}">
+                {% for task in tasks %}
+                    {% if task.status == status.0 %}
+                    <div class="kanban-card" draggable="true" data-task-id="{{ task.id }}" data-assigned-to="{{ task.assigne_a.id|default:'' }}">
+                        <div class="card-title">
+                            <a href="{% url 'taskdoor:edit_task' task.id %}">
+                                {{ task.description|truncatechars:50 }}
+                            </a>
+                        </div>
+                        {% if task.description|length > 50 %}
+                        <div class="card-description">
+                            {{ task.description|slice:"50:"|truncatechars:100 }}
+                        </div>
+                        {% endif %}
+                        <div class="card-footer">
+                            <span class="priority priority-{{ task.importance|lower }}">
+                                {{ task.get_importance_display }}
+                            </span>
+                            <span class="assignee" title="Assigné à {{ task.assigne_a.email|default:'Personne' }}">
+                                <i class="fas fa-user"></i> {{ task.assigne_a.email|default:'Non assigné'|truncatechars:15 }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="empty-state">
+                        Aucune tâche
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Font Awesome pour les icônes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.kanban-card');
+    const columns = document.querySelectorAll('.column-content');
+    
+    let draggedItem = null;
+
+    // Gestion du drag & drop
+    cards.forEach(card => {
+        card.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            setTimeout(() => {
+                this.classList.add('dragging');
+            }, 0);
+            
+            // Définir l'effet de déplacement
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.taskId);
+        });
+
+        card.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+        });
+        
+        // Empêcher la propagation des événements de clic lors du glisser
+        card.addEventListener('mousedown', function(e) {
+            if (e.target.tagName === 'A') {
+                e.stopPropagation();
+            }
+        });
+    });
+
+    columns.forEach(column => {
+        column.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(column, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            
+            if (afterElement == null) {
+                column.appendChild(draggable);
+            } else {
+                column.insertBefore(draggable, afterElement);
+            }
+        });
+
+        column.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedItem) {
+                // Mettre à jour le statut de la tâche via AJAX
+                const taskId = draggedItem.dataset.taskId;
+                const newStatus = this.parentElement.dataset.status;
+                
+                // Envoyer la requête AJAX pour mettre à jour le statut
+                fetch(`/task/update-status/${taskId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFTOKEN': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        'status': newStatus
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mettre à jour le compteur de tâches
+                        updateTaskCounts();
+                    } else {
+                        console.error('Erreur lors de la mise à jour du statut');
+                        // Recharger la page en cas d'erreur
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    window.location.reload();
+                });
+            }
+        });
+    });
+    
+    // Fonction pour déterminer la position de dépôt
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.kanban-card:not(.dragging)')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Mettre à jour les compteurs de tâches
+    function updateTaskCounts() {
+        document.querySelectorAll('.kanban-column').forEach(column => {
+            const status = column.dataset.status;
+            const count = column.querySelectorAll('.kanban-card').length;
+            column.querySelector('.task-count').textContent = count;
+        });
+    }
+
+    // Filtrage des tâches par utilisateur
+    const userFilter = document.getElementById('user-filter');
+    if (userFilter) {
+        userFilter.addEventListener('change', function() {
+            const userId = this.value;
+            const allCards = document.querySelectorAll('.kanban-card');
+            
+            allCards.forEach(card => {
+                if (!userId || card.dataset.assignedTo === userId) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Mettre à jour les compteurs
+            updateTaskCounts();
+        });
+    }
+
+    // Gestion du clic sur le bouton de nouvelle tâche
+    const newTaskBtn = document.querySelector('.button.primary');
+    if (newTaskBtn) {
+        newTaskBtn.addEventListener('click', function(e) {
+            // Le lien gère déjà la navigation
+        });
+    }
+});
+</script>
+{% endblock %}

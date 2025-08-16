@@ -1,0 +1,238 @@
+/* Reset CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Styles de base */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.5;
+    color: #333;
+    background-color: #f4f5f7;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Conteneur principal */
+.kanban-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* En-tête */
+.kanban-header {
+    background: linear-gradient(135deg, #172b4d 0%, #1a3a6a 100%);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 10;
+}
+
+.kanban-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.kanban-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #f9fafc;
+    border-bottom: 1px solid #dfe1e6;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.button {
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.button:hover {
+    background-color: #0065ff;
+    transform: translateY(-1px);
+}
+
+.button.primary { background-color: #0052cc; }
+.button.warning { background-color: #ff991f; }
+.button.danger { background-color: #de350b; }
+
+/* Filtre utilisateur */
+.filter-dropdown select {
+    padding: 0.5rem;
+    border-radius: 3px;
+    border: 1px solid #dfe1e6;
+    background-color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Contenu principal */
+.kanban-content {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    background-color: #f4f5f7;
+    min-width: 0; /* Permet le défilement horizontal */
+}
+
+/* Colonnes */
+.kanban-column {
+    background-color: #ebecf0;
+    border-radius: 8px;
+    width: 350px;
+    min-width: 350px; /* Largeur fixe pour chaque colonne */
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 200px);
+    box-shadow: 0 1px 1px rgba(9, 30, 66, 0.1);
+    flex-shrink: 0; /* Empêche le rétrécissement des colonnes */
+}
+
+.column-header {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #172b4d;
+    background-color: #ebecf0;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #dfe1e6;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.column-content {
+    padding: 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f4f5f7;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Cartes */
+.kanban-card {
+    background-color: white;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 1px 0 rgba(9, 30, 66, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid #4c9aff;
+}
+
+.kanban-card:hover {
+    background-color: #fafbfc;
+    box-shadow: 0 3px 6px rgba(9, 30, 66, 0.15);
+    transform: translateY(-1px);
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #172b4d;
+    font-size: 0.95rem;
+}
+
+.card-description {
+    font-size: 0.85rem;
+    color: #5e6c84;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #5e6c84;
+    padding-top: 0.5rem;
+    border-top: 1px solid #ebecf0;
+}
+
+.priority {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-high { background-color: #ffebee; color: #c62828; }
+.priority-medium { background-color: #fff8e1; color: #f57f17; }
+.priority-low { background-color: #e8f5e9; color: #2e7d32; }
+
+/* Compteur de tâches */
+.task-count {
+    background-color: #dfe1e6;
+    color: #5e6c84;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Barre de défilement personnalisée */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(9, 30, 66, 0.04);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c7d0;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a5adba;
+}
+
+/* Style pour les colonnes d'état spécifiques */
+.kanban-column[data-status="TO DO"] {
+    border-top: 3px solid #5e6c84;
+}
+
+.kanban-column[data-status="EN COURS"] {
+    border-top: 3px solid #0052cc;
+}
+
+.kanban-column[data-status="TERMINÉ"] {
+    border-top: 3px solid #00875a;
+}

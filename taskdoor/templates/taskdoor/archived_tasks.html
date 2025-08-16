@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load dict_filters %}
+
+{% block title %}Tâches Archivées{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="text-center mb-4">Tâches Archivées</h1>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="btn-group">
+                    <a href="{% url 'taskdoor:admin_dashboard' %}" class="btn btn-primary">
+                        Retour au tableau de bord
+                    </a>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                        Tous les utilisateurs
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                        <li><a class="dropdown-item active" href="?">Tous</a></li>
+                        {% for user in users %}
+                            <li><a class="dropdown-item" href="?user={{ user.id }}">{{ user.email }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if tasks %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Assigné à</th>
+                                        <th>Créé par</th>
+                                        <th>Date de création</th>
+                                        <th>Dernière mise à jour</th>
+                                        <th>Importance</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in tasks %}
+                                        <tr>
+                                            <td>{{ task.description|truncatechars:100 }}</td>
+                                            <td>{{ task.assigne_a.email }}</td>
+                                            <td>{{ task.cree_par.email }}</td>
+                                            <td>{{ task.date_creation|date:"d/m/Y H:i" }}</td>
+                                            <td>{{ task.date_mise_a_jour|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ task.importance|lower }}">
+                                                    {{ task.get_importance_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ task.get_status_display }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{% url 'taskdoor:edit_task' task.id %}" class="btn btn-sm btn-primary" title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-success unarchive-task" data-task-id="{{ task.id }}" title="Désarchiver">
+                                                        <i class="fas fa-box-open"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Aucune tâche archivée pour le moment.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unarchive Confirmation Modal -->
+<div class="modal fade" id="unarchiveTaskModal" tabindex="-1" aria-labelledby="unarchiveTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unarchiveTaskModalLabel">Désarchiver la tâche</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir désarchiver cette tâche ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" id="confirmUnarchive">Désarchiver</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        let taskToUnarchive = null;
+        const unarchiveModal = new bootstrap.Modal(document.getElementById('unarchiveTaskModal'));
+        
+        // Handle unarchive button click
+        $('.unarchive-task').on('click', function() {
+            taskToUnarchive = $(this).data('task-id');
+            unarchiveModal.show();
+        });
+        
+        // Confirm unarchive
+        $('#confirmUnarchive').on('click', function() {
+            if (taskToUnarchive) {
+                $.ajax({
+                    url: `/taskdoor/task/${taskToUnarchive}/unarchive/`,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFTTOKEN': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Reload the page to see changes
+                            window.location.reload();
+                        }
+                    },
+                    error: function() {
+                        alert('Une erreur est survenue lors de la désarchivage de la tâche.');
+                    }
+                });
+            }
+            unarchiveModal.hide();
+        });
+    });
+</script>
+{% endblock %}

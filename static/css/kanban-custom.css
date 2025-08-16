@@ -1,0 +1,107 @@
+/* Reset complet des marges et paddings */
+* {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.kanban-board-container {
+    height: 100%;
+    width: 100%;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.kanban-board-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+}
+
+.kanban-board {
+    flex: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Ajustement des colonnes */
+.kanban-column {
+    height: 100%;
+    padding: 0.5rem !important;
+    margin: 0 2px !important;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Ajustement du contenu des colonnes */
+.kanban-column-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Ajustement des cartes */
+.kanban-card {
+    margin-bottom: 0.5rem !important;
+}
+
+/* Ajustement du conteneur principal */
+.container-fluid {
+    height: 100%;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ajustement des colonnes Bootstrap */
+.col-md-4 {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100%;
+    flex: 1 0 auto;
+    max-width: 100%;
+}
+
+/* Ajustement des rangées */
+.row {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    --bs-gutter-x: 0;
+}
+
+/* Ajustement des cartes pour occuper toute la hauteur */
+.card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+}
+
+/* Suppression des marges inutiles */
+body {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden;
+}

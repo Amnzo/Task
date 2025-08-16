@@ -38,10 +38,9 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['titre', 'description', 'importance', 'assigne_a']
+        fields = ['description', 'importance', 'assigne_a']
         widgets = {
-            'titre': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter task description'}),
             'assigne_a': forms.HiddenInput()
         }
 
@@ -55,10 +54,9 @@ class TaskAdminForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['titre', 'description', 'status', 'importance', 'assigne_a']
+        fields = ['description', 'status', 'importance', 'assigne_a']
         widgets = {
-            'titre': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter task description'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'assigne_a': forms.Select(attrs={'class': 'form-select'})
         }

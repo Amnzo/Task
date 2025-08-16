@@ -19,7 +19,8 @@ register = Library()
 @register.filter
 @user_passes_test(lambda u: u.niveau == 'admin')
 def get_item(dictionary, key):
-    return dictionary.get(key)
+    return dictionary.get(key, '')
+
 from .models import Task, Door, STATUS_CHOICES, IMPORTANCE_CHOICES
 from .forms import LoginForm, TaskForm, TaskAdminForm, DoorCreationForm
 
@@ -60,21 +61,31 @@ def admin_dashboard(request):
     if request.user.niveau != 'admin':
         return redirect('taskdoor:user_dashboard')
 
-    tasks = Task.objects.all()
+    # Récupérer tous les utilisateurs pour le filtre
     users = Door.objects.all()
     
-    # Filter by user
+    # Initialiser les filtres pour les tâches non archivées
+    filter_kwargs = {'archived': False}
+    
+    # Filtrer par utilisateur si spécifié
     user_id = request.GET.get('user')
     if user_id:
-        tasks = tasks.filter(assigne_a__id=user_id)
+        filter_kwargs['assigne_a__id'] = user_id
     
-    # Count tasks by status
-    status_counts = {}
-    for status, label in STATUS_CHOICES:
-        status_counts[status] = tasks.filter(status=status).count()
+    # Récupérer toutes les tâches correspondant aux filtres
+    all_tasks = Task.objects.filter(**filter_kwargs)
+    
+    # Grouper les tâches par statut
+    tasks_by_status = {status[0]: [] for status in STATUS_CHOICES}
+    for task in all_tasks:
+        tasks_by_status[task.status].append(task)
+    
+    # Compter les tâches par statut
+    status_counts = {status[0]: len(tasks) for status, tasks in tasks_by_status.items()}
 
     context = {
-        'tasks': tasks,
+        'tasks_by_status': tasks_by_status,  # Tâches groupées par statut
+        'tasks': all_tasks,  # Toutes les tâches (pour la rétrocompatibilité)
         'users': users,
         'STATUS_CHOICES': STATUS_CHOICES,
         'IMPORTANCE_CHOICES': IMPORTANCE_CHOICES,
@@ -223,3 +234,60 @@ def reassign_task(request, task_id):
         'task': task,
         'users': users
     })
+
+@login_required
+@user_passes_test(is_admin)
+def archived_tasks(request):
+    """View to display all archived tasks."""
+    tasks = Task.objects.filter(archived=True).order_by('-date_mise_a_jour')
+    users = Door.objects.all()
+    
+    # Filter by user if specified
+    user_id = request.GET.get('user')
+    if user_id:
+        tasks = tasks.filter(assigne_a__id=user_id)
+    
+    context = {
+        'tasks': tasks,
+        'users': users,
+        'STATUS_CHOICES': STATUS_CHOICES,
+        'IMPORTANCE_CHOICES': IMPORTANCE_CHOICES,
+        'is_archived_view': True,  # Flag to indicate this is the archived tasks view
+    }
+    return render(request, 'taskdoor/archived_tasks.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def unarchive_task(request, task_id):
+    """View to unarchive a task."""
+    if request.method == 'POST':
+        task = get_object_or_404(Task, id=task_id)
+        task.archived = False
+        task.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+@login_required
+@user_passes_test(is_admin)
+def archive_task(request, task_id):
+    """View to archive a task."""
+    if request.method == 'POST':
+        task = get_object_or_404(Task, id=task_id)
+        task.archived = True
+        task.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+@login_required
+@user_passes_test(is_admin)
+def archive_all_done_tasks(request):
+    # View to archive all tasks with status 'done'.
+    if request.method == 'POST':
+        tasks = Task.objects.filter(status='done', is_archived=False)
+        count = tasks.count()
+        tasks.update(is_archived=True)
+        messages.success(request, f'{count} tâches terminées ont été archivées.')
+        return redirect('taskdoor:archived_tasks')
+    else:
+        return redirect('taskdoor:admin_dashboard')
+

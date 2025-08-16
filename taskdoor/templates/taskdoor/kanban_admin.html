@@ -1,190 +1,18 @@
 {% extends 'base.html' %}
 {% load dict_filters %}
+{% load static %}
 
-{% block title %}Gestion des Tâches{% endblock %}
+{% block title %}*****{% endblock %}
 
 {% block extra_css %}
 <!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<!-- jQuery UI -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<style>
-    /* Variables CSS */
-    :root {
-        --primary-color: #2563eb;
-        --success-color: #10b981;
-        --warning-color: #f59e0b;
-        --danger-color: #ef4444;
-        --background-color: #f3f4f6;
-        --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --hover-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    }
+<link rel="stylesheet" href="{% static 'css/kanban-custom.css' %}">
 
-    /* Styles généraux */
-    body {
-        background-color: var(--background-color);
-        color: #1f2937;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
-    .kanban-board {
-        margin-top: 2rem;
-        padding: 2rem;
-    }
-
-    .kanban-column {
-        min-height: 400px;
-        padding: 1.5rem;
-        border-radius: 1rem;
-        background: white;
-        box-shadow: var(--card-shadow);
-        transition: all 0.3s ease;
-    }
-
-    .kanban-column:hover {
-        box-shadow: var(--hover-shadow);
-    }
-
-    .kanban-column-content {
-        padding: 2rem 0;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .kanban-card {
-        flex: 0 0 auto;
-        width: 100%;
-        margin: 0 auto;
-        max-width: 100%;
-        margin-bottom: 1.5rem;
-        border-radius: 1rem;
-        background: white;
-        box-shadow: var(--card-shadow);
-        transition: all 0.3s ease;
-        border: 1px solid #e5e7eb;
-        overflow: hidden;
-    }
-
-    .kanban-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--hover-shadow);
-        border-color: var(--primary-color);
-    }
-
-    .kanban-card-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.75rem;
-    }
-
-    .kanban-card-description {
-        color: #6b7280;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 1rem;
-    }
-
-    .task-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .task-meta .badge {
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        background-color: #f3f4f6;
-        color: #6b7280;
-        transition: all 0.2s ease;
-    }
-
-    .task-meta .badge:hover {
-        background-color: #e5e7eb;
-        color: #4b5563;
-    }
-
-    /* Styles spécifiques pour l'importance */
-    .importance-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        border-radius: 0.75rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        transition: all 0.3s ease;
-    }
-
-    .importance-badge.LOW {
-        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-        color: #166534;
-        border: 2px solid #166534;
-        box-shadow: 0 2px 4px rgba(22, 101, 52, 0.1);
-    }
-
-    .importance-badge.MEDIUM {
-        background: linear-gradient(135deg, #fde0bf, #fbbf24);
-        color: #92400e;
-        border: 2px solid #92400e;
-        box-shadow: 0 2px 4px rgba(146, 64, 14, 0.1);
-    }
-
-    .importance-badge.HIGH {
-        background: linear-gradient(135deg, #fee2e2, #ef4444);
-        color: #991b1b;
-        border: 2px solid #991b1b;
-        box-shadow: 0 2px 4px rgba(153, 27, 27, 0.1);
-    }
-
-    /* Styles pour les boutons */
-    .task-actions .btn {
-        padding: 0.5em 1em;
-        font-size: 0.875rem;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-
-    .task-actions .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .task-actions .btn i {
-        margin-right: 0.375rem;
-    }
-
-    .task-assignee {
-        display: flex;
-        align-items: center;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    .task-assignee i {
-        color: #0d6efd;
-    }
-
-    .task-assignee .badge {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        padding: 0.35em 0.65em;
-        font-size: 0.875em;
-        border-radius: 0.25rem;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="kanban-board-container px-0">
     <div class="row mb-4">
         <div class="col">
             <h1 class="text-center mb-4">Gestion des Tâches</h1>
@@ -194,6 +22,8 @@
                         Nouvelle tâche
                     </button>
                     <a href="{% url 'taskdoor:create_user' %}" class="btn btn-success">Nouvel utilisateur</a>
+                    <a href="{% url 'taskdoor:archived_tasks' %}" class="btn btn-warning">Tâches Archivées</a>
+                   
                 </div>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
@@ -213,42 +43,48 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row gx-1">
         {% for status, label in STATUS_CHOICES %}
-            <div class="col-md-4">
+            <div class="col-md-4 px-1">
                 <div class="card">
-                    <div class="card-header">
-                        <h3>{{ label }}</h3>
-                        <span class="badge bg-secondary">{{ status_counts|get_item:status }}</span>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="d-inline">{{ label }}</h3>
+                            <span class="badge bg-secondary ms-2">{{ status_counts|get_item:status }}</span>
+                        </div>
+                        {% if status == 'TERMINÉ' %}
+                        <button class="btn btn-sm btn-secondary archive-all-done" title="Archiver toutes les tâches terminées">
+                            <i class="fas fa-archive me-1"></i> Archiver tout
+                        </button>
+                        {% endif %}
                     </div>
                     <div class="kanban-column-content">
                         {% for task in tasks %}
                             {% if task.status == status %}
                                 <div class="kanban-card" data-task-id="{{ task.id }}">
-                                    <div class="kanban-card-header">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="importance-badge {{ task.importance }}">
-                                                <div class="importance-label">{{ task.get_importance_display }}</div>
-                                            </div>
-                                            <div class="task-actions d-flex gap-2">
-                                                <a href="{% url 'taskdoor:edit_task' task.id %}" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button class="btn btn-sm btn-info reassign-task" data-bs-toggle="modal" data-bs-target="#reassignTaskModal" data-task-id="{{ task.id }}">
-                                                    <i class="fas fa-user-plus"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="{{ task.id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                     <div class="kanban-card-body">
-                                        <h6 class="kanban-card-title">{{ task.titre }}</h6>
                                         <p class="kanban-card-description">{{ task.description }}</p>
                                         <div class="task-meta d-flex flex-wrap gap-2">
                                             <span class="badge bg-secondary">Assigné à: {{ task.assigne_a.email }}</span>
                                             <span class="badge bg-info">Créé par: {{ task.cree_par.email }}</span>
+                                            <span class="badge 
+                                            {% if task.importance == 'LOW' %}bg-success
+                                            {% elif task.importance == 'MEDIUM' %}bg-warning text-dark
+                                            {% elif task.importance == 'HIGH' %}bg-danger
+                                            {% endif %}">
+                                            {{ task.get_importance_display }}
+                                        </span>
+                                        <a href="{% url 'taskdoor:edit_task' task.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-info reassign-task" data-bs-toggle="modal" data-bs-target="#reassignTaskModal" data-task-id="{{ task.id }}">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="{{ task.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        
                                         </div>
                                     </div>
                                 </div>
@@ -265,6 +101,124 @@
 </div>
 
 {% endblock content %}
+
+{% block extra_js %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Définition des variables Django -->
+<script>
+    window.taskdoorConfig = {
+        csrfToken: '{{ csrf_token }}',
+        statusCounts: {
+            'TO DO': {{ status_counts.TO_DO }},
+            'EN COURS': {{ status_counts.EN_COURS }},
+            'TERMINÉ': {{ status_counts.TERMINÉ }}
+        }
+    };
+
+    $(document).ready(function() {
+        // Vérification de l'initialisation de jQuery et SweetAlert2
+        console.log('jQuery version:', $.fn.jquery);
+        console.log('SweetAlert2 est disponible:', typeof Swal !== 'undefined');
+        console.log('Boutons archive-all-done trouvés:', $('.archive-all-done').length);
+
+        // Fonction pour mettre à jour les compteurs de statut
+        function updateStatusCounts() {
+            $('.kanban-column').each(function() {
+                const status = $(this).data('status');
+                const count = $(this).find('.kanban-card').length;
+                $(this).find('.status-count').text(count);
+            });
+        }
+
+    // Initial call to update status counts
+    updateStatusCounts();
+
+    // Gestion de l'archivage de toutes les tâches terminées
+    $(document).on('click', '.archive-all-done', function(e) {
+        console.log('Bouton archive-all-done cliqué!');
+        e.preventDefault();
+        const button = $(this);
+        console.log('Bouton trouvé:', button.length > 0);
+        
+        const column = button.closest('.card');
+        console.log('Colonne parente trouvée:', column.length > 0);
+        
+        const taskCount = column.find('.kanban-card').length;
+        console.log('Nombre de tâches trouvées:', taskCount);
+        
+        if (taskCount === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Aucune tâche à archiver',
+                text: 'Il n\'y a aucune tâche terminée à archiver pour le moment.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Archiver les tâches terminées',
+            text: `Êtes-vous sûr de vouloir archiver les ${taskCount} tâches terminées ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Oui, archiver',
+            cancelButtonText: 'Annuler',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{% url "taskdoor:archive_all_done_tasks" %}',
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    data: {},
+                    dataType: 'json'
+                })
+                .done(function(response) {
+                    console.log('Réponse du serveur:', response);
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Succès !',
+                            text: response.message || `Les ${response.archived_count || taskCount} tâches ont été archivées avec succès.`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(response.error || 'Erreur inconnue');
+                    }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error('Erreur AJAX:', textStatus, errorThrown);
+                    let errorMsg = 'Une erreur est survenue lors de l\'archivage des tâches.';
+                    try {
+                        const response = JSON.parse(jqXHR.responseText);
+                        errorMsg = response.error || errorMsg;
+                    } catch (e) {}
+                    
+                    return Swal.fire({
+                        title: 'Erreur',
+                        text: errorMsg,
+                        icon: 'error'
+                    });
+                });
+        }
+    });
+});
+</script>
 
 <!-- Modals -->
 <!-- Modal d'édition de tâche -->
@@ -366,29 +320,27 @@
     </div>
 </div>
 
-{% block extra_js %}
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- jQuery UI -->
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Définition des variables Django -->
-<script>
-    window.taskdoorConfig = {
-        csrfToken: '{{ csrf_token }}',
-        statusCounts: {
-            'TO DO': {{ status_counts.TO_DO }},
-            'EN COURS': {{ status_counts.EN_COURS }},
-            'TERMINÉ': {{ status_counts.TERMINÉ }}
-        }
-    };
-</script>
 
 <!-- Code JavaScript principal -->
 <script>
-    $(document).ready(function() {
+$(document).ready(function() {
+    // Vérification de l'initialisation de jQuery et SweetAlert2
+    console.log('jQuery version:', $.fn.jquery);
+    console.log('SweetAlert2 est disponible:', typeof Swal !== 'undefined');
+    console.log('Boutons archive-all-done trouvés:', $('.archive-all-done').length);
+
+    // Fonction pour mettre à jour les compteurs de statut
+    function updateStatusCounts() {
+        $('.kanban-column').each(function() {
+            const status = $(this).data('status');
+            const count = $(this).find('.kanban-card').length;
+            $(this).find('.status-count').text(count);
+        });
+    }
+
+    // Initial call to update status counts
+    updateStatusCounts();
         // Gestion du drag and drop
         $('.kanban-column').sortable({
             connectWith: '.kanban-column',
@@ -484,7 +436,7 @@
                             // Mettre à jour les badges
                             $('.kanban-column').each(function() {
                                 const status = $(this).data('status');
-                                $(this).closest('.card').find('.badge').text(window.taskdoorConfig.statusCounts[status]);
+                                $(this).find('.status-count').text(window.taskdoorConfig.statusCounts[status]);
                             });
                             
                             // Mettre à jour le statut dans la carte
@@ -499,6 +451,11 @@
             }
         });
 
+        // Vérifications de débogage
+        console.log('jQuery version:', $.fn.jquery);
+        console.log('SweetAlert2 est disponible:', typeof Swal !== 'undefined');
+        console.log('Boutons archive-all-done trouvés:', $('.archive-all-done').length);
+        
         // Gestion de la création de tâche
         const createTaskModal = new bootstrap.Modal(document.getElementById('createTaskModal'));
         $('#createTaskForm').on('submit', function(e) {
@@ -516,19 +473,29 @@
                         const column = $('.kanban-column[data-status="' + status + '"]');
                         const taskHtml = `
                             <div class="kanban-card" data-task-id="${response.id}">
-                                <div class="importance-badge ${response.importance}">
-                                    <div class="importance-label">${response.importance}</div>
+                                <div class="kanban-card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="importance-badge ${response.importance}">
+                                            <div class="importance-label">${response.importance}</div>
+                                        </div>
+                                        <div class="task-actions d-flex gap-2">
+                                            <button class="btn btn-sm btn-primary edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-task-id="${response.id}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="${response.id}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                </div>
-                                <h5 class="card-title">${response.titre}</h5>
-                                <p class="card-text">${response.description}</p>
-                                <div class="task-actions">
-                                    <button class="btn btn-sm btn-primary edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal" data-task-id="${response.id}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger delete-task" data-bs-toggle="modal" data-bs-target="#deleteTaskModal" data-task-id="${response.id}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                <div class="kanban-card-body">
+                                    <p class="kanban-card-description">${response.description}</p>
+                                    <div class="task-meta d-flex flex-wrap gap-2">
+                                        <span class="badge bg-secondary">Assigné à: ${response.assigned_to_email}</span>
+                                        <span class="badge bg-${response.importance === 'LOW' ? 'success' : response.importance === 'MEDIUM' ? 'warning' : 'danger'}">
+                                            ${response.importance}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -554,13 +521,10 @@
             const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]').first();
             
             // Récupérer les données de la tâche
-            const titre = taskCard.find('.card-title').text();
-            const description = taskCard.find('.card-text').text();
-            const importance = taskCard.find('.task-importance').attr('class').match(/LOW|MEDIUM|HIGH/)[0];
+            const description = taskCard.find('.kanban-card-description').text();
+            const importance = taskCard.find('.importance-badge').attr('class').match(/LOW|MEDIUM|HIGH/)[0];
             
             // Remplir le formulaire
-            $('#editTaskModal select[name="importance"]').val(importance);
-            $('#editTaskForm input[name="titre"]').val(titre);
             $('#editTaskForm textarea[name="description"]').val(description);
             $('#editTaskForm select[name="importance"]').val(importance);
             $('#editTaskForm').data('task-id', taskId);
@@ -583,9 +547,11 @@
                     if (response.success) {
                         // Mettre à jour la carte
                         const taskCard = $('.kanban-card[data-task-id="' + taskId + '"]').first();
-                        taskCard.find('.card-title').text(response.titre);
-                        taskCard.find('.card-text').text(response.description);
-                        taskCard.find('.task-importance').removeClass('low medium high').addClass(response.importance);
+                        taskCard.find('.kanban-card-description').text(response.description);
+                        taskCard.find('.importance-badge')
+                            .removeClass('LOW MEDIUM HIGH')
+                            .addClass(response.importance)
+                            .find('.importance-label').text(response.importance);
                         
                         // Fermer la modal
                         editTaskModal.hide();

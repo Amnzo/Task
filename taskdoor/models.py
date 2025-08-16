@@ -17,9 +17,9 @@ STATUS_CHOICES = (
 
 # Niveaux d'importance
 IMPORTANCE_CHOICES = (
-    ('LOW', 'LOW'),
-    ('MEDIUM', 'MEDIUM'),
-    ('HIGH', 'HIGH')
+    ('LOW', 'L'),
+    ('MEDIUM', 'M'),
+    ('HIGH', 'H')
 )
 
 class DoorManager(BaseUserManager):
@@ -54,7 +54,6 @@ class Door(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 class Task(models.Model):
-    titre = models.CharField(max_length=200)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TO DO')
     importance = models.CharField(
@@ -67,6 +66,7 @@ class Task(models.Model):
     cree_par = models.ForeignKey(Door, on_delete=models.CASCADE, related_name='tasks_crees')
     date_creation = models.DateTimeField(auto_now_add=True)
     date_mise_a_jour = models.DateTimeField(auto_now=True)
+    archived = models.BooleanField(default=False, verbose_name='Archivée')
 
     def __str__(self):
-        return self.titre
+        return self.description[:50] + '...' if len(self.description) > 50 else self.description

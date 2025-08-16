@@ -10,11 +10,15 @@ class DoorAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'description', 'status', 'assigne_a', 'cree_par', 'date_creation')
+    list_display = ('truncated_description', 'status', 'assigne_a', 'cree_par', 'date_creation')
     list_filter = ('status', 'assigne_a', 'cree_par')
-    search_fields = ('titre', 'description', 'assigne_a__email', 'cree_par__email')
+    search_fields = ('description', 'assigne_a__email', 'cree_par__email')
     ordering = ('-date_creation',)
     readonly_fields = ('date_creation', 'date_mise_a_jour')
     
     # Add fields that can be edited in the list view
     list_editable = ('status', 'assigne_a')
+    
+    def truncated_description(self, obj):
+        return obj.description[:50] + '...' if len(obj.description) > 50 else obj.description
+    truncated_description.short_description = 'Description'
