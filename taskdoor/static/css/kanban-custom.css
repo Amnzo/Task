@@ -75,6 +75,48 @@
     padding: 0 5px;
 }
 
+/* User badges */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    background-color: #f1f5f9;
+    color: #334155;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.user-badge i {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.user-email {
+    margin-left: 4px;
+    font-weight: 400;
+    font-size: 0.9em;
+}
+
+.user-badge.assignee {
+    background-color: #e0f2fe;
+    border-color: #bae6fd;
+    color: #0369a1;
+}
+
+.user-badge.creator {
+    background-color: #f0f9ff;
+    border-color: #e0f2fe;
+    color: #0c4a6e;
+}
+
+.user-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /* Priorités */
 .high-priority {
     border-left-color: #dc3545;
